@@ -7,3 +7,6 @@ ssl_port = 8082
 server_log_level="TRACE"
 query_log_level="TRACE"
 log_dir="./logs"
+
+[database]
+url_env="TITAN_DB_URL"

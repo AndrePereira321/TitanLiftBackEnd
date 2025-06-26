@@ -8,6 +8,7 @@ import (
 
 type ServerConfig struct {
 	httpServer HttpConfig
+	database   DatabaseConfig
 	logging    LoggingConfig
 }
 
@@ -17,6 +18,10 @@ func (c ServerConfig) HttpServer() HttpConfig {
 
 func (c ServerConfig) Logging() LoggingConfig {
 	return c.logging
+}
+
+func (c ServerConfig) Database() DatabaseConfig {
+	return c.database
 }
 
 type HttpConfig struct {
@@ -31,6 +36,14 @@ func (s HttpConfig) Host() string {
 
 func (s HttpConfig) Port() uint {
 	return s.port
+}
+
+type DatabaseConfig struct {
+	urlEnv string
+}
+
+func (d DatabaseConfig) UrlEnv() string {
+	return d.urlEnv
 }
 
 type LoggingConfig struct {
@@ -69,6 +82,12 @@ func GetServerConfig(data []byte) (*ServerConfig, error) {
 		return nil, err
 	} else {
 		serverConfig.logging = *loggingConfig
+	}
+
+	if databaseConfig, err := getDatabaseConfig(v); err != nil {
+		return nil, err
+	} else {
+		serverConfig.database = *databaseConfig
 	}
 
 	return serverConfig, nil
@@ -111,6 +130,17 @@ func getLoggingConfig(v *viper.Viper) (*LoggingConfig, error) {
 	}
 
 	return &loggingConfig, nil
+}
+
+func getDatabaseConfig(v *viper.Viper) (*DatabaseConfig, error) {
+	databaseConfig := DatabaseConfig{}
+
+	databaseConfig.urlEnv = v.GetString("database.url_env")
+	if len(databaseConfig.urlEnv) == 0 {
+		return nil, server_error.New("CONFIG_PARSER", "database url env is empty")
+	}
+
+	return &databaseConfig, nil
 }
 
 func getViper() *viper.Viper {
