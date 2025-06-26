@@ -1,0 +1,17 @@
+#!/bin/sh
+# Pre-push hook to run tests
+
+echo "Running Tests"
+
+# Run all Go tests
+go test ./...
+TEST_EXIT_CODE=$?
+
+# Check if tests passed
+if [ TEST_EXIT_CODE=$? -ne 0 ]; then
+    echo "❌ Tests failed! Push cancelled."
+    exit 1
+fi
+
+echo "✅ All tests passed! Proceeding with push."
+exit 0
