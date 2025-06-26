@@ -33,3 +33,6 @@ go.work.sum
 
 #Config Files
 *.toml
+
+#Log Files
+*.log
