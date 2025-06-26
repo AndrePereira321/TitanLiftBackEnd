@@ -49,3 +49,17 @@ func TestServerErrorComparing(t *testing.T) {
 	})
 
 }
+
+func TestIsServerError(t *testing.T) {
+	t.Run("is server error", func(t *testing.T) {
+		error1 := New("TEST", "Test Error")
+		libError := errors.New("TEST")
+
+		if !IsServerError(error1, "TEST") {
+			t.Error("Failing comparing server error")
+		}
+		if IsServerError(libError, "TEST") {
+			t.Error("Failing comparing lib error")
+		}
+	})
+}

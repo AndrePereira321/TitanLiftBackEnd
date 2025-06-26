@@ -38,6 +38,11 @@ func (e *ServerError) Is(target error) bool {
 	return false
 }
 
+func IsServerError(err error, code string) bool {
+	var serverError *ServerError
+	return errors.As(err, &serverError) && serverError.Code == code
+}
+
 func (e *ServerError) String() string {
 	return e.Error()
 }
