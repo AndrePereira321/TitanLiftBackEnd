@@ -8,10 +8,15 @@ import (
 
 type ServerConfig struct {
 	httpServer HttpConfig
+	logging    LoggingConfig
 }
 
-func (c *ServerConfig) HttpServer() HttpConfig {
+func (c ServerConfig) HttpServer() HttpConfig {
 	return c.httpServer
+}
+
+func (c ServerConfig) Logging() LoggingConfig {
+	return c.logging
 }
 
 type HttpConfig struct {
@@ -20,25 +25,50 @@ type HttpConfig struct {
 	sslPort uint
 }
 
-func (s *HttpConfig) Host() string {
+func (s HttpConfig) Host() string {
 	return s.host
 }
 
-func (s *HttpConfig) Port() uint {
+func (s HttpConfig) Port() uint {
 	return s.port
 }
 
+type LoggingConfig struct {
+	logDir         string
+	serverLogLevel string
+	queryLogLevel  string
+}
+
+func (l LoggingConfig) LogDir() string {
+	return l.logDir
+}
+
+func (l LoggingConfig) ServerLogLevel() string {
+	return l.serverLogLevel
+}
+
+func (l LoggingConfig) QueryLogLevel() string {
+	return l.queryLogLevel
+}
+
 func GetServerConfig(data []byte) (*ServerConfig, error) {
+	serverConfig := &ServerConfig{}
 	v := getViper()
+
 	if err := v.ReadConfig(bytes.NewReader(data)); err != nil {
 		return nil, server_error.Wrap("CONFIG_PARSER", "error when reading config data", err)
 	}
 
-	serverConfig := &ServerConfig{}
 	if httpConfig, err := getHttpConfig(v); err != nil {
 		return nil, err
 	} else {
 		serverConfig.httpServer = *httpConfig
+	}
+
+	if loggingConfig, err := getLoggingConfig(v); err != nil {
+		return nil, err
+	} else {
+		serverConfig.logging = *loggingConfig
 	}
 
 	return serverConfig, nil
@@ -63,6 +93,24 @@ func getHttpConfig(v *viper.Viper) (*HttpConfig, error) {
 	}
 
 	return &httpConfig, nil
+}
+
+func getLoggingConfig(v *viper.Viper) (*LoggingConfig, error) {
+	loggingConfig := LoggingConfig{}
+
+	loggingConfig.logDir = v.GetString("logging.log_dir")
+
+	loggingConfig.serverLogLevel = v.GetString("logging.server_log_level")
+	if len(loggingConfig.serverLogLevel) == 0 {
+		loggingConfig.serverLogLevel = "INFO"
+	}
+
+	loggingConfig.queryLogLevel = v.GetString("logging.query_log_level")
+	if len(loggingConfig.queryLogLevel) == 0 {
+		loggingConfig.queryLogLevel = "INFO"
+	}
+
+	return &loggingConfig, nil
 }
 
 func getViper() *viper.Viper {

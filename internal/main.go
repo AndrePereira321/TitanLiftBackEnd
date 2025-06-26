@@ -12,8 +12,21 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	logger, err := getServerLogger(serverConfig)
+	if err != nil {
+		panic(err)
+	}
 
+	defer logger.Close()
+
+	fmt.Println(logger)
 	fmt.Println(serverConfig)
+}
+
+func getServerLogger(config *config.ServerConfig) (*Logger, error) {
+	level := config.Logging().ServerLogLevel()
+	dir := config.Logging().LogDir()
+	return NewLogger("SERVER", level, dir)
 }
 
 func getConfig() (*config.ServerConfig, error) {
