@@ -4,6 +4,7 @@ echo 🧪 Running tests before push...
 REM Run all Go tests
 
 go test ./...
+
 IF %ERRORLEVEL% EQU 0 (
     echo ✅ Tests passed! Proceeding with push.
     EXIT /B 0
