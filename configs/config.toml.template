@@ -1,4 +1,4 @@
 [server]
 host = "localhost"
 port = 8080
-sslPort = 8082
+ssl_port = 8082
