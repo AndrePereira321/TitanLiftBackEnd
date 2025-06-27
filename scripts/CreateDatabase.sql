@@ -4,7 +4,7 @@
 --   username: Database username to create
 --   password: Password for the user
 
-
+\c postgres
 CREATE DATABASE :database_name;
 
 CREATE USER :user_name WITH PASSWORD :password;
