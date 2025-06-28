@@ -23,6 +23,8 @@ CREATE TABLE "user_auth"
     FOREIGN KEY (user_id) REFERENCES "user" (id)
 );
 
+CREATE INDEX idx_user_auth_user_id ON "user_auth" USING HASH (user_id);
+
 CREATE TABLE "user_profile"
 (
     id         BIGSERIAL PRIMARY KEY,
@@ -36,6 +38,8 @@ CREATE TABLE "user_profile"
 
     FOREIGN KEY (user_id) REFERENCES "user" (id)
 );
+
+CREATE INDEX idx_user_profile_user_id ON "user_profile" USING HASH (user_id);
 
 -- migrate:down
 DROP TABLE "user_profile";
