@@ -15,7 +15,7 @@ type Logger struct {
 	lumber *lumberjack.Logger
 }
 
-func NewLogger(name, level, logDir string) (*Logger, error) {
+func New(name, level, logDir string) (*Logger, error) {
 	logLevel := getLogLevel(level)
 	writer, lumber, err := getLogWriter(name, logDir)
 	if err != nil {

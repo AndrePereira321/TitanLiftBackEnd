@@ -20,7 +20,7 @@ func main() {
 	}
 	defer logger.Close()
 
-	database, err := database.NewDatabase(serverConfig)
+	database, err := database.New(serverConfig)
 	if err != nil {
 		panic(err)
 	}
@@ -34,7 +34,7 @@ func main() {
 func getServerLogger(config *config.ServerConfig) (*logger.Logger, error) {
 	level := config.Logging().ServerLogLevel()
 	dir := config.Logging().LogDir()
-	return logger.NewLogger("SERVER", level, dir)
+	return logger.New("SERVER", level, dir)
 }
 
 func getConfig() (*config.ServerConfig, error) {

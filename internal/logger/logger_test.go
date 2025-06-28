@@ -6,7 +6,7 @@ import (
 
 func TestNewLogger(t *testing.T) {
 	t.Run("test logger constructor", func(t *testing.T) {
-		noFileLogger, err := NewLogger("TEST", "DEBUG", "")
+		noFileLogger, err := New("TEST", "DEBUG", "")
 		defer func() {
 			_ = noFileLogger.Close()
 		}()
@@ -18,7 +18,7 @@ func TestNewLogger(t *testing.T) {
 		}
 
 		tempDir := t.TempDir()
-		fileLogger, err := NewLogger("TEST", "DEBUG", tempDir)
+		fileLogger, err := New("TEST", "DEBUG", tempDir)
 		defer func() {
 			_ = fileLogger.Close()
 		}()

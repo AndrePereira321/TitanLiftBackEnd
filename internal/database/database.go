@@ -19,8 +19,8 @@ type Database struct {
 	logger *logger.Logger
 }
 
-func NewDatabase(config *config.ServerConfig) (*sql.DB, error) {
-	dbLogger, err := logger.NewLogger("DATABASE", config.Logging().DatabaseLogLevel(), config.Logging().LogDir())
+func New(config *config.ServerConfig) (*sql.DB, error) {
+	dbLogger, err := logger.New("DATABASE", config.Logging().DatabaseLogLevel(), config.Logging().LogDir())
 	if err != nil {
 		return nil, err
 	}
