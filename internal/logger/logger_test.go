@@ -1,6 +1,8 @@
-package main
+package logger
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestNewLogger(t *testing.T) {
 	t.Run("test logger constructor", func(t *testing.T) {

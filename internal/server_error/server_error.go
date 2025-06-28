@@ -21,7 +21,7 @@ func Wrap(code, message string, cause error) *ServerError {
 
 func (e *ServerError) Error() string {
 	if e.Cause != nil {
-		return fmt.Sprintf("[%s] %s - Caused by: %v", e.Code, e.Message, e.Cause)
+		return fmt.Sprintf("[%s] %s - Caused by: \n\t-%v", e.Code, e.Message, e.Cause)
 	}
 	return fmt.Sprintf("[%s] %s", e.Code, e.Message)
 }

@@ -11,9 +11,6 @@ Golang backend server designed for an application that logs gym progress.
 
 The server is configured using a TOML configuration file. Template is available in the `/configs` folder.
 
-The database connection is configured in the following environment variables:
+The database connection is configured in the following environment variable:
 
-- `TITAN_DB_HOST` - IP address of the database server
-- `TITAN_DB_USER` - Username for the database
-- `TITAN_DB_PASSWORD` - Password for the database user
-- `TITAN_DB_NAME` - Name of the database
+- `TITAN_DB_URL` - URL of PostgresDB connection (ex: postgres://username:password@127.0.0.1:5432/database_name?sslmode=disable)

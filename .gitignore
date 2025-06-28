@@ -37,3 +37,7 @@ dataSources.xml
 
 #Log Files
 *.log
+
+#Database
+schema.sql
+CreateDB.bat

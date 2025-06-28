@@ -34,9 +34,9 @@ func (s HttpConfig) Port() uint {
 }
 
 type LoggingConfig struct {
-	logDir         string
-	serverLogLevel string
-	queryLogLevel  string
+	logDir           string
+	serverLogLevel   string
+	databaseLogLevel string
 }
 
 func (l LoggingConfig) LogDir() string {
@@ -47,8 +47,8 @@ func (l LoggingConfig) ServerLogLevel() string {
 	return l.serverLogLevel
 }
 
-func (l LoggingConfig) QueryLogLevel() string {
-	return l.queryLogLevel
+func (l LoggingConfig) DatabaseLogLevel() string {
+	return l.databaseLogLevel
 }
 
 func GetServerConfig(data []byte) (*ServerConfig, error) {
@@ -105,9 +105,9 @@ func getLoggingConfig(v *viper.Viper) (*LoggingConfig, error) {
 		loggingConfig.serverLogLevel = "INFO"
 	}
 
-	loggingConfig.queryLogLevel = v.GetString("logging.query_log_level")
-	if len(loggingConfig.queryLogLevel) == 0 {
-		loggingConfig.queryLogLevel = "INFO"
+	loggingConfig.databaseLogLevel = v.GetString("logging.database_log_level")
+	if len(loggingConfig.databaseLogLevel) == 0 {
+		loggingConfig.databaseLogLevel = "INFO"
 	}
 
 	return &loggingConfig, nil

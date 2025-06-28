@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"titan-lift/internal/config"
+	"titan-lift/internal/database"
+	"titan-lift/internal/logger"
 	"titan-lift/internal/server_error"
 )
 
@@ -16,17 +18,23 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
 	defer logger.Close()
+
+	database, err := database.NewDatabase(serverConfig)
+	if err != nil {
+		panic(err)
+	}
+	//defer database.Close()
 
 	fmt.Println(logger)
 	fmt.Println(serverConfig)
+	fmt.Println(database)
 }
 
-func getServerLogger(config *config.ServerConfig) (*Logger, error) {
+func getServerLogger(config *config.ServerConfig) (*logger.Logger, error) {
 	level := config.Logging().ServerLogLevel()
 	dir := config.Logging().LogDir()
-	return NewLogger("SERVER", level, dir)
+	return logger.NewLogger("SERVER", level, dir)
 }
 
 func getConfig() (*config.ServerConfig, error) {
