@@ -8,6 +8,7 @@ import (
 
 type ServerConfig struct {
 	httpServer HttpConfig
+	database   DatabaseConfig
 	logging    LoggingConfig
 }
 
@@ -17,6 +18,10 @@ func (c ServerConfig) HttpServer() HttpConfig {
 
 func (c ServerConfig) Logging() LoggingConfig {
 	return c.logging
+}
+
+func (c ServerConfig) Database() DatabaseConfig {
+	return c.database
 }
 
 type HttpConfig struct {
@@ -31,6 +36,19 @@ func (s HttpConfig) Host() string {
 
 func (s HttpConfig) Port() uint {
 	return s.port
+}
+
+type DatabaseConfig struct {
+	maxOpenCons int
+	maxIdleCons int
+}
+
+func (d DatabaseConfig) MaxOpenCons() int {
+	return d.maxOpenCons
+}
+
+func (d DatabaseConfig) MaxIdleCons() int {
+	return d.maxIdleCons
 }
 
 type LoggingConfig struct {
@@ -63,6 +81,12 @@ func GetServerConfig(data []byte) (*ServerConfig, error) {
 		return nil, err
 	} else {
 		serverConfig.httpServer = *httpConfig
+	}
+
+	if databaseConfig, err := getDatabaseConfig(v); err != nil {
+		return nil, err
+	} else {
+		serverConfig.database = *databaseConfig
 	}
 
 	if loggingConfig, err := getLoggingConfig(v); err != nil {
@@ -111,6 +135,22 @@ func getLoggingConfig(v *viper.Viper) (*LoggingConfig, error) {
 	}
 
 	return &loggingConfig, nil
+}
+
+func getDatabaseConfig(v *viper.Viper) (*DatabaseConfig, error) {
+	databaseConfig := DatabaseConfig{}
+
+	databaseConfig.maxOpenCons = v.GetInt("database.max_open_connections")
+	if databaseConfig.maxOpenCons <= 0 {
+		databaseConfig.maxOpenCons = 25
+	}
+
+	databaseConfig.maxIdleCons = v.GetInt("database.max_idle_connections")
+	if databaseConfig.maxIdleCons <= 0 {
+		databaseConfig.maxIdleCons = 25
+	}
+
+	return &databaseConfig, nil
 }
 
 func getViper() *viper.Viper {

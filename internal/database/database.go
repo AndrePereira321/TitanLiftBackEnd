@@ -19,20 +19,43 @@ type Database struct {
 	logger *logger.Logger
 }
 
-func New(config *config.ServerConfig) (*sql.DB, error) {
-	dbLogger, err := logger.New("DATABASE", config.Logging().DatabaseLogLevel(), config.Logging().LogDir())
+func New(serverConfig *config.ServerConfig) (*Database, error) {
+	dbLogger, err := logger.New("DATABASE", serverConfig.Logging().DatabaseLogLevel(), serverConfig.Logging().LogDir())
 	if err != nil {
 		return nil, err
+	}
+
+	dbURL := os.Getenv(config.EnvTitanDbUrl)
+	if dbURL == "" {
+		return nil, server_error.New("DB_UPGRADE", "database URL environment variable is not set")
 	}
 
 	dbLogger.Info("Initializing database.")
-	err = upgradeStructure(config, dbLogger)
+	err = upgradeStructure(serverConfig, dbLogger, dbURL)
 	if err != nil {
 		return nil, err
 	}
 
+	db, err := sql.Open("postgres", dbURL)
+	if err != nil {
+		return nil, server_error.Wrap("DB_CONNECT", "failed to open database", err)
+	}
+
+	db.SetMaxIdleConns(serverConfig.Database().MaxIdleCons())
+	db.SetMaxOpenConns(serverConfig.Database().MaxOpenCons())
+
+	err = db.Ping()
+	if err != nil {
+		_ = db.Close()
+		return nil, server_error.Wrap("DB_CONNECT", "failed to ping database", err)
+	}
+
 	dbLogger.Info("Database successfully initialized.")
-	return nil, nil
+
+	return &Database{
+		db:     db,
+		logger: dbLogger,
+	}, nil
 }
 
 func (d *Database) Close() error {
@@ -46,34 +69,29 @@ func (d *Database) Close() error {
 //go:embed migrations/*.sql
 var fs embed.FS
 
-func upgradeStructure(serverConfig *config.ServerConfig, dbLogger *logger.Logger) error {
-	dbLogger.Debug("Upgrading database structure.")
+func upgradeStructure(serverConfig *config.ServerConfig, dbLogger *logger.Logger, dbURL string) error {
+	dbLogger.Debug("Upgrading database structure")
 
-	dbUrl := os.Getenv(config.EnvTitanDbUrl)
-	if len(dbUrl) == 0 {
-		return server_error.New("DB_UPGRADE", "unable to find database url")
-	}
-
-	u, err := url.Parse(dbUrl)
+	parsedURL, err := url.Parse(dbURL)
 	if err != nil {
-		return server_error.Wrap("DB_UPGRADE", "error when parsing database url", err)
+		return server_error.Wrap("DB_UPGRADE", "failed to parse database URL", err)
 	}
 
 	dbMateLogFile, err := url.JoinPath(serverConfig.Logging().LogDir(), "DB_UPGRADE.log")
 	if err != nil {
-		return server_error.Wrap("DB_UPGRADE", "error when joining dbmate log file path", err)
+		return server_error.Wrap("DB_UPGRADE", "failed to create DBMate log file path\n", err)
 	}
 
 	dbMateFile, err := os.OpenFile(dbMateLogFile, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
 	if err != nil {
-		return server_error.Wrap("DB_UPGRADE", "error when opening dbmate log file", err)
+		return server_error.Wrap("DB_UPGRADE", "failed to open DBMate log file", err)
 	}
 
 	defer func(dbMateFile *os.File) {
 		_ = dbMateFile.Close()
 	}(dbMateFile)
 
-	dbMate := dbmate.New(u)
+	dbMate := dbmate.New(parsedURL)
 	dbMate.FS = fs
 	dbMate.Verbose = true
 	dbMate.Strict = true
@@ -82,7 +100,7 @@ func upgradeStructure(serverConfig *config.ServerConfig, dbLogger *logger.Logger
 
 	migrations, err := dbMate.FindMigrations()
 	if err != nil {
-		return server_error.Wrap("DB_UPGRADE", "error when finding migrations", err)
+		return server_error.Wrap("DB_UPGRADE", "failed to find migrations", err)
 	}
 
 	for _, migration := range migrations {
@@ -92,9 +110,9 @@ func upgradeStructure(serverConfig *config.ServerConfig, dbLogger *logger.Logger
 	dbLogger.Trace("Applying migrations.")
 	err = dbMate.Migrate()
 	if err != nil {
-		return server_error.Wrap("DB_UPGRADE", "error when upgrading database", err)
+		return server_error.Wrap("DB_UPGRADE", "failed to apply migrations", err)
 	}
 
-	dbLogger.Debug("Database structure successfully upgraded.")
+	dbLogger.Debug("Database structure upgrade completed successfully")
 	return nil
 }
