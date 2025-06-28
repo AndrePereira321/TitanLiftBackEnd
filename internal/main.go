@@ -1,10 +1,10 @@
 package main
 
 import (
+	"log/slog"
 	"os"
 	"titan-lift/internal/config"
-	"titan-lift/internal/database"
-	"titan-lift/internal/logger"
+	"titan-lift/internal/server"
 	"titan-lift/internal/server_error"
 )
 
@@ -14,21 +14,19 @@ func main() {
 		panic(err)
 	}
 
-	appLogger, err := logger.New("APP", "TRACE", serverConfig.Logging().LogDir())
+	server, err := server.New(serverConfig)
 	if err != nil {
 		panic(err)
 	}
-	defer func(appLogger *logger.Logger) {
-		_ = appLogger.Close()
-	}(appLogger)
-
-	db, err := database.New(serverConfig)
-	if err != nil {
-		appLogger.FatalEvent().Err(err).Msg("failed to initialize database")
-	}
-	defer func(database *database.Database) {
-		_ = database.Close()
-	}(db)
+	defer func() {
+		if server == nil {
+			return
+		}
+		err = server.Close()
+		if err != nil {
+			slog.Error("Error Closing Server: " + err.Error())
+		}
+	}()
 }
 
 func getConfig() (*config.ServerConfig, error) {
