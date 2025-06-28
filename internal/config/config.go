@@ -43,9 +43,9 @@ func (a *AppConfig) Version() *AppVersion {
 }
 
 type HttpConfig struct {
-	host    string
-	port    uint
-	sslPort uint
+	host          string
+	port          uint
+	enablePreFork bool
 }
 
 func (s *HttpConfig) Host() string {
@@ -54,6 +54,10 @@ func (s *HttpConfig) Host() string {
 
 func (s *HttpConfig) Port() uint {
 	return s.port
+}
+
+func (s *HttpConfig) EnablePreFork() bool {
+	return s.enablePreFork
 }
 
 type DatabaseConfig struct {
@@ -135,10 +139,7 @@ func getHttpConfig(v *viper.Viper) (*HttpConfig, error) {
 		httpConfig.port = 80
 	}
 
-	httpConfig.sslPort = v.GetUint("server.ssl_port")
-	if httpConfig.sslPort == 0 {
-		httpConfig.sslPort = 443
-	}
+	httpConfig.enablePreFork = v.GetBool("server.enable_pre_fork")
 
 	return &httpConfig, nil
 }

@@ -1,7 +1,11 @@
+[app]
+name="TitanLift"
+version="1.0.0-alpha"
+
 [server]
 host = "localhost"
 port = 8080
-ssl_port = 8082
+enable_pre_fork = false
 
 [logging]
 server_log_level="TRACE"
