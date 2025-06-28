@@ -38,13 +38,13 @@ func (e *ServerError) Is(target error) bool {
 	return false
 }
 
+func (e *ServerError) String() string {
+	return e.Error()
+}
+
 func IsServerError(err error, code string) bool {
 	var serverError *ServerError
 	return errors.As(err, &serverError) && serverError.Code == code
-}
-
-func (e *ServerError) String() string {
-	return e.Error()
 }
 
 func newServerError(code string, message string, cause error) *ServerError {

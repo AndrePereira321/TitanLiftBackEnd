@@ -13,4 +13,4 @@ The server is configured using a TOML configuration file. Template is available 
 
 The database connection is configured in the following environment variable:
 
-- `TITAN_DB_URL` - URL of PostgresDB connection (ex: postgres://username:password@127.0.0.1:5432/database_name?sslmode=disable)
+- `DATABASE_URL` - URL of PostgresDB connection (ex: postgres://username:password@127.0.0.1:5432/database_name?sslmode=disable)

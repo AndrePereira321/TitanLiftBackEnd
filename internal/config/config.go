@@ -7,21 +7,39 @@ import (
 )
 
 type ServerConfig struct {
-	httpServer HttpConfig
-	database   DatabaseConfig
-	logging    LoggingConfig
+	appConfig  *AppConfig
+	httpServer *HttpConfig
+	database   *DatabaseConfig
+	logging    *LoggingConfig
 }
 
-func (c ServerConfig) HttpServer() HttpConfig {
+func (c *ServerConfig) AppConfig() *AppConfig {
+	return c.appConfig
+}
+
+func (c *ServerConfig) HttpServer() *HttpConfig {
 	return c.httpServer
 }
 
-func (c ServerConfig) Logging() LoggingConfig {
+func (c *ServerConfig) Logging() *LoggingConfig {
 	return c.logging
 }
 
-func (c ServerConfig) Database() DatabaseConfig {
+func (c *ServerConfig) Database() *DatabaseConfig {
 	return c.database
+}
+
+type AppConfig struct {
+	name    string
+	version *AppVersion
+}
+
+func (a *AppConfig) Name() string {
+	return a.name
+}
+
+func (a *AppConfig) Version() *AppVersion {
+	return a.version
 }
 
 type HttpConfig struct {
@@ -30,11 +48,11 @@ type HttpConfig struct {
 	sslPort uint
 }
 
-func (s HttpConfig) Host() string {
+func (s *HttpConfig) Host() string {
 	return s.host
 }
 
-func (s HttpConfig) Port() uint {
+func (s *HttpConfig) Port() uint {
 	return s.port
 }
 
@@ -43,11 +61,11 @@ type DatabaseConfig struct {
 	maxIdleCons int
 }
 
-func (d DatabaseConfig) MaxOpenCons() int {
+func (d *DatabaseConfig) MaxOpenCons() int {
 	return d.maxOpenCons
 }
 
-func (d DatabaseConfig) MaxIdleCons() int {
+func (d *DatabaseConfig) MaxIdleCons() int {
 	return d.maxIdleCons
 }
 
@@ -57,15 +75,15 @@ type LoggingConfig struct {
 	databaseLogLevel string
 }
 
-func (l LoggingConfig) LogDir() string {
+func (l *LoggingConfig) LogDir() string {
 	return l.logDir
 }
 
-func (l LoggingConfig) ServerLogLevel() string {
+func (l *LoggingConfig) ServerLogLevel() string {
 	return l.serverLogLevel
 }
 
-func (l LoggingConfig) DatabaseLogLevel() string {
+func (l *LoggingConfig) DatabaseLogLevel() string {
 	return l.databaseLogLevel
 }
 
@@ -77,22 +95,28 @@ func GetServerConfig(data []byte) (*ServerConfig, error) {
 		return nil, server_error.Wrap("CONFIG_PARSER", "error when reading config data", err)
 	}
 
+	if appConfig, err := getAppConfig(v); err != nil {
+		return nil, err
+	} else {
+		serverConfig.appConfig = appConfig
+	}
+
 	if httpConfig, err := getHttpConfig(v); err != nil {
 		return nil, err
 	} else {
-		serverConfig.httpServer = *httpConfig
+		serverConfig.httpServer = httpConfig
 	}
 
 	if databaseConfig, err := getDatabaseConfig(v); err != nil {
 		return nil, err
 	} else {
-		serverConfig.database = *databaseConfig
+		serverConfig.database = databaseConfig
 	}
 
 	if loggingConfig, err := getLoggingConfig(v); err != nil {
 		return nil, err
 	} else {
-		serverConfig.logging = *loggingConfig
+		serverConfig.logging = loggingConfig
 	}
 
 	return serverConfig, nil
@@ -151,6 +175,23 @@ func getDatabaseConfig(v *viper.Viper) (*DatabaseConfig, error) {
 	}
 
 	return &databaseConfig, nil
+}
+
+func getAppConfig(v *viper.Viper) (*AppConfig, error) {
+	appConfig := AppConfig{}
+
+	appConfig.name = v.GetString("app.name")
+	if len(appConfig.name) == 0 {
+		return nil, server_error.New("CONFIG_PARSER", "app name is empty")
+	}
+
+	version, err := NewAppVersion(v.GetString("app.version"))
+	if err != nil {
+		return nil, err
+	}
+	appConfig.version = version
+
+	return &appConfig, nil
 }
 
 func getViper() *viper.Viper {
