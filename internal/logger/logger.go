@@ -36,7 +36,7 @@ func New(name, level, logDir string) (*Logger, error) {
 }
 
 func (l *Logger) Trace(msg string) {
-	l.logger.Trace().Msg(msg)
+	l.TraceEvent().Msg(msg)
 }
 
 func (l *Logger) TraceEvent() *zerolog.Event {
@@ -44,7 +44,7 @@ func (l *Logger) TraceEvent() *zerolog.Event {
 }
 
 func (l *Logger) Debug(msg string) {
-	l.logger.Debug().Msg(msg)
+	l.DebugEvent().Msg(msg)
 }
 
 func (l *Logger) DebugEvent() *zerolog.Event {
@@ -52,7 +52,7 @@ func (l *Logger) DebugEvent() *zerolog.Event {
 }
 
 func (l *Logger) Info(msg string) {
-	l.logger.Info().Msg(msg)
+	l.InfoEvent().Msg(msg)
 }
 
 func (l *Logger) InfoEvent() *zerolog.Event {
@@ -60,7 +60,7 @@ func (l *Logger) InfoEvent() *zerolog.Event {
 }
 
 func (l *Logger) Warn(msg string) {
-	l.logger.Warn().Msg(msg)
+	l.WarnEvent().Msg(msg)
 }
 
 func (l *Logger) WarnEvent() *zerolog.Event {
@@ -68,7 +68,7 @@ func (l *Logger) WarnEvent() *zerolog.Event {
 }
 
 func (l *Logger) Error(msg string) {
-	l.logger.Error().Msg(msg)
+	l.ErrorEvent().Msg(msg)
 }
 
 func (l *Logger) ErrorEvent() *zerolog.Event {
@@ -76,7 +76,7 @@ func (l *Logger) ErrorEvent() *zerolog.Event {
 }
 
 func (l *Logger) Fatal(msg string) {
-	l.logger.Fatal().Msg(msg)
+	l.FatalEvent().Msg(msg)
 }
 
 func (l *Logger) FatalEvent() *zerolog.Event {
