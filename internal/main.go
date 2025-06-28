@@ -30,7 +30,9 @@ func run() error {
 	}
 	defer func() {
 		if closeErrors := httpServer.Close(); len(closeErrors) > 0 {
-			slog.Error("Failed to close server resources", "error", closeErrors[0])
+			for _, closeErr := range closeErrors {
+				slog.Error("Failed to close server resources", "error", closeErr)
+			}
 		}
 	}()
 
@@ -57,7 +59,7 @@ func run() error {
 	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), time.Minute)
 	defer shutdownCancel()
 
-	if err := httpServer.Shutdown(shutdownCtx); err != nil {
+	if err = httpServer.Shutdown(shutdownCtx); err != nil {
 		return server_error.Wrap("MAIN", "failed to shutdown server gracefully", err)
 	}
 
