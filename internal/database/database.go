@@ -82,7 +82,7 @@ func upgradeStructure(serverConfig *config.ServerConfig, dbLogger *logger.Logger
 		return server_error.Wrap("DB_UPGRADE", "failed to create DBMate log file path\n", err)
 	}
 
-	dbMateFile, err := os.OpenFile(dbMateLogFile, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
+	dbMateFile, err := os.OpenFile(dbMateLogFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
 		return server_error.Wrap("DB_UPGRADE", "failed to open DBMate log file", err)
 	}
