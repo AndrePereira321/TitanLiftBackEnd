@@ -24,6 +24,38 @@ CREATE TABLE public.schema_migrations (
 
 
 --
+-- Name: session; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.session (
+    id bigint NOT NULL,
+    user_id bigint NOT NULL,
+    is_active boolean DEFAULT true,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+
+--
+-- Name: session_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.session_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: session_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.session_id_seq OWNED BY public.session.id;
+
+
+--
 -- Name: user; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -127,6 +159,13 @@ ALTER SEQUENCE public.user_profile_id_seq OWNED BY public.user_profile.id;
 
 
 --
+-- Name: session id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.session ALTER COLUMN id SET DEFAULT nextval('public.session_id_seq'::regclass);
+
+
+--
 -- Name: user id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -153,6 +192,14 @@ ALTER TABLE ONLY public.user_profile ALTER COLUMN id SET DEFAULT nextval('public
 
 ALTER TABLE ONLY public.schema_migrations
     ADD CONSTRAINT schema_migrations_pkey PRIMARY KEY (version);
+
+
+--
+-- Name: session session_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.session
+    ADD CONSTRAINT session_pkey PRIMARY KEY (id);
 
 
 --
@@ -188,6 +235,13 @@ ALTER TABLE ONLY public.user_profile
 
 
 --
+-- Name: idx_session_user_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_session_user_id ON public.session USING hash (user_id);
+
+
+--
 -- Name: idx_user_auth_user_id; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -199,6 +253,14 @@ CREATE INDEX idx_user_auth_user_id ON public.user_auth USING hash (user_id);
 --
 
 CREATE INDEX idx_user_profile_user_id ON public.user_profile USING hash (user_id);
+
+
+--
+-- Name: session session_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.session
+    ADD CONSTRAINT session_user_id_fkey FOREIGN KEY (user_id) REFERENCES public."user"(id);
 
 
 --

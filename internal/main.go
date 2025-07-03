@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"log"
 	"log/slog"
 	"os"
 	"os/signal"
@@ -14,7 +15,7 @@ import (
 
 func main() {
 	if err := run(); err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 }
 
@@ -38,7 +39,7 @@ func run() error {
 
 	listeningErrorChannel := make(chan error, 1)
 	go func() {
-		if listenErr := httpServer.Listen(); listenErr != nil { // FIX: use listenErr
+		if listenErr := httpServer.Listen(); listenErr != nil {
 			listeningErrorChannel <- server_error.Wrap("MAIN", "server failed to start", listenErr)
 		}
 		close(listeningErrorChannel)
