@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v3/middleware/cors"
 	"strconv"
 	"titan-lift/internal/config"
 	"titan-lift/internal/database"
@@ -29,6 +30,15 @@ func New(serverConfig *config.ServerConfig) (*Server, error) {
 	}
 
 	fiberApp := getFiberApp(serverConfig)
+
+	if serverConfig.HttpServer().Origin() != "" {
+		fiberApp.Use(cors.New(cors.Config{
+			AllowCredentials: true,
+			AllowOrigins:     []string{serverConfig.HttpServer().Origin()},
+			AllowHeaders:     []string{"Origin", "Content-Type", "Accept"},
+			AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		}))
+	}
 
 	return &Server{
 		config: serverConfig,
