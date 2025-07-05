@@ -36,6 +36,7 @@ func run() error {
 			}
 		}
 	}()
+	httpServer.RegisterRoutes()
 
 	listeningErrorChannel := make(chan error, 1)
 	go func() {

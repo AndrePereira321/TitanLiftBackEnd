@@ -8,6 +8,7 @@ import (
 	"titan-lift/internal/config"
 	"titan-lift/internal/database"
 	"titan-lift/internal/logger"
+	"titan-lift/internal/server/routes"
 	"titan-lift/internal/server_error"
 )
 
@@ -55,6 +56,26 @@ func (s *Server) Listen() error {
 	return s.fiber.Listen(s.listenAddress(), fiber.ListenConfig{
 		EnablePrefork: s.config.HttpServer().EnablePreFork(),
 	})
+}
+
+func (s *Server) Get(path string, handler RouteHandler) {
+	s.fiber.Get(path, func(ctx fiber.Ctx) error {
+		return s.handleRoute(&ctx, handler)
+	})
+}
+
+func (s *Server) Post(path string, handler RouteHandler) {
+	s.fiber.Post(path, func(ctx fiber.Ctx) error {
+		return s.handleRoute(&ctx, handler)
+	})
+}
+
+func (s *Server) handleRoute(ctx *fiber.Ctx, handler RouteHandler) error {
+	routeContext, err := routes.GetRouteContext(ctx, s.db)
+	if err != nil {
+		return err
+	}
+	return handler(routeContext)
 }
 
 func (s *Server) Shutdown(ctx context.Context) error {
